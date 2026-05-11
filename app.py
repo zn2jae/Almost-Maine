@@ -1,59 +1,70 @@
-import streamlit as st
-from streamlit_gsheets import GSheetsConnection
-import pandas as pd
-import os
-
-# 페이지 설정
-st.set_page_config(page_title="공연 홍보 도장판", layout="centered")
-
-# Google Sheets 연결 초기화
-conn = st.connection("gsheets", type=GSheetsConnection)
-
-# 세션 상태 초기화
-if 'stamps' not in st.session_state:
-    st.session_state.stamps = [False, False, False, False]
-
-st.title("🎭 공연 홍보 디지털 도장판")
-st.info("4개의 도장을 모두 모으면 추첨 응모가 가능합니다!")
-
-# 도장 현황판 (이미지 표시)
-cols = st.columns(4)
-for i in range(4):
-    with cols[i]:
-        if st.session_state.stamps[i]:
-            st.image("images/stamp_filled.png", caption=f"미션 {i+1} 완료!")
-        else:
-            st.image("images/stamp_empty.png", caption=f"미션 {i+1} 대기중")
+# 현재 사용자가 어떤 미션을 선택했는지 저장하는 상태 추가
+if 'selected_mission' not in st.session_state:
+    st.session_state.selected_mission = None
 
 st.divider()
 
-# --- 미션 로직 (이전과 동일, 정답만 수정하세요) ---
-# [생략: 이전 퀴즈 및 코드 입력 로직 적용]
+# --- 스탬프 선택 섹션 ---
+st.subheader("📍 미션을 선택하세요")
+cols = st.columns(4)
 
-# --- 최종 응모 섹션 (Google Sheets 연동) ---
-if all(st.session_state.stamps):
-    st.balloons()
-    st.success("🎉 축하합니다! 모든 도장을 모았습니다.")
-    
-    with st.form("entry_form"):
-        st.subheader("🎟️ 추첨 응모함")
-        name = st.text_input("이름")
-        student_id = st.text_input("학번")
-        phone = st.text_input("연락처")
-        submit_button = st.form_submit_button("실시간 응모하기")
+for i in range(4):
+    with cols[i]:
+        # 도장 상태에 따른 이미지 표시 (이미 배포하신 images 폴더 기준)
+        img_path = "images/stamp_filled.png" if st.session_state.stamps[i] else "images/stamp_empty.png"
+        st.image(img_path, use_container_width=True)
         
-        if submit_button:
-            if name and student_id and phone:
-                # 시트에서 기존 데이터 읽기
-                existing_data = conn.read(ttl=0) # 캐시 없이 실시간 읽기
+        # 미션 선택 버튼
+        if not st.session_state.stamps[i]:
+            if st.button(f"미션 {i+1} 도전", key=f"btn_{i}"):
+                st.session_state.selected_mission = i
+        else:
+            st.write("✅ 완료!")
+
+st.divider()
+
+# --- 선택된 미션 인터랙션 영역 ---
+if st.session_state.selected_mission is not None:
+    m_idx = st.session_state.selected_mission
+    
+    if m_idx == 0:
+        st.info("🎫 미션 1: 온라인 퀴즈")
+        ans1 = st.text_input("공연의 주인공 이름은?")
+        if st.button("제출하기"):
+            if ans1 == "홍길동": # 정답 수정
+                st.session_state.stamps[0] = True
+                st.session_state.selected_mission = None # 미션창 닫기
+                st.rerun()
                 
-                # 새 데이터 추가
-                new_entry = pd.DataFrame([{"이름": name, "학번": student_id, "연락처": phone}])
-                updated_df = pd.concat([existing_data, new_entry], ignore_index=True)
-                
-                # 시트에 업데이트 저장
-                conn.update(data=updated_df)
-                
-                st.success(f"{name}님, 실시간 응모가 완료되었습니다! 시트에서 확인 가능합니다.")
-            else:
-                st.error("모든 정보를 입력해주세요.")
+    elif m_idx == 1:
+        st.info("🎫 미션 2: 온라인 퀴즈")
+        ans2 = st.text_input("공연이 열리는 장소는?")
+        if st.button("제출하기"):
+            if ans2 == "강당": # 정답 수정
+                st.session_state.stamps[1] = True
+                st.session_state.selected_mission = None
+                st.rerun()
+
+    elif m_idx == 2:
+        st.info("🎫 미션 3: 배우 상호작용")
+        st.write("배우를 찾아 '첫 번째 암호'를 입력하세요!")
+        code1 = st.text_input("시크릿 코드 입력", type="password")
+        if st.button("확인"):
+            if code1 == "1234": # 암호 수정
+                st.session_state.stamps[2] = True
+                st.session_state.selected_mission = None
+                st.rerun()
+
+    elif m_idx == 3:
+        st.info("🎫 미션 4: 배우 상호작용")
+        st.write("마지막 배우를 찾아 '두 번째 암호'를 입력하세요!")
+        code2 = st.text_input("최종 암호 입력", type="password")
+        if st.button("확인"):
+            if code2 == "5678": # 암호 수정
+                st.session_state.stamps[3] = True
+                st.session_state.selected_mission = None
+                st.rerun()
+else:
+    st.write("위의 버튼을 눌러 미션을 시작하세요.")
+
+# --- 응모 섹션은 동일하게 유지 (모든 도장이 True일 때만 나타남) ---
