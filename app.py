@@ -112,23 +112,18 @@ if all(st.session_state.stamps):
         phone = st.text_input("연락처")
         submit_button = st.form_submit_button("응모하기")
         
-        if submit_button:
-            if name and sid and phone:
-                try:
-                    # 1. 기존 데이터 읽기
-                    df = conn.read(ttl=0) 
-                    
-                    # 2. 새 데이터 행 만들기
-                    new_data = pd.DataFrame([{"이름": name, "학번": sid, "연락처": phone}])
-                    
-                    # 3. 데이터 합치기
-                    updated_df = pd.concat([df, new_data], ignore_index=True)
-                    
-                    # 4. 시트에 업데이트
-                    conn.update(data=updated_df)
-                    
-                    st.success(f"{name}님, 응모가 완료되었습니다! 감사합니다.")
-                except Exception as e:
-                    st.error(f"오류가 발생했습니다: {e}")
+       if submit_button:
+    if name and sid and phone:
+        try:
+            # 새 데이터 행 만들기
+            new_data = pd.DataFrame([{"이름": name, "학번": sid, "연락처": phone}])
+            
+            # 기존 시트의 아래에 데이터 추가 (append)
+            conn.create(data=new_data) 
+            
+            st.success(f"{name}님, 응모가 완료되었습니다!")
+            st.balloons()
+        except Exception as e:
+            st.error(f"오류가 발생했습니다: {e}")
             else:
                 st.error("모든 정보를 입력해주세요.")
