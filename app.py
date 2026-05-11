@@ -99,36 +99,38 @@ if st.session_state.selected_mission is not None:
                 st.error("최종 암호가 틀렸습니다.")
 
 # ... (하단 응모 섹션 코드는 그대로 유지) ...
-# --- 6. 최종 응모 섹션 (Google Sheets 실시간 저장) ---
+# --- 6. 최종 응모 섹션 (안전한 데이터 업데이트 방식) ---
 if all(st.session_state.stamps):
     st.divider()
     st.balloons()
     st.success("🎉 모든 도장을 모으셨습니다! 아래 양식을 작성하여 응모하세요.")
     
-    # st.form 내부의 모든 요소는 반드시 같은 수준으로 들여쓰기 되어야 합니다.
     with st.form("entry_form"):
         st.subheader("🎟️ 추첨 응모함")
         name = st.text_input("이름")
         sid = st.text_input("학번")
         phone = st.text_input("연락처")
         
-        # 폼 제출 버튼
         submit_button = st.form_submit_button("응모하기")
         
-        # 버튼이 눌렸을 때의 로직 (버튼과 들여쓰기 수준이 같아야 함)
         if submit_button:
             if name and sid and phone:
                 try:
-                    # 새 데이터 행 만들기
-                    new_data = pd.DataFrame([{"이름": name, "학번": sid, "연락처": phone}])
+                    # 1. 기존 '시트1'의 데이터를 실시간으로 읽어옵니다.
+                    # ttl=0은 캐시를 사용하지 않고 즉시 읽어오라는 뜻입니다.
+                    existing_data = conn.read(worksheet="시트1", ttl=0)
                     
-                    # '시트1' 워크시트에 데이터 추가
-                    # 인증 에러 방지를 위해 worksheet 이름을 명시했습니다.
-                    conn.create(data=new_data, worksheet="시트1") 
+                    # 2. 새 응모자 정보를 데이터프레임으로 만듭니다.
+                    new_entry = pd.DataFrame([{"이름": name, "학번": sid, "연락처": phone}])
+                    
+                    # 3. 기존 데이터와 새 데이터를 합칩니다.
+                    updated_df = pd.concat([existing_data, new_entry], ignore_index=True)
+                    
+                    # 4. 합쳐진 전체 데이터를 '시트1'에 덮어씁니다. (이게 가장 확실합니다)
+                    conn.update(worksheet="시트1", data=updated_df)
                     
                     st.success(f"{name}님, 응모가 성공적으로 완료되었습니다!")
                 except Exception as e:
-                    # 상세 에러 메시지 출력으로 문제 파악 용이하게 설정
                     st.error(f"데이터 전송 중 오류가 발생했습니다: {e}")
             else:
                 st.error("모든 정보를 입력해주세요.")
