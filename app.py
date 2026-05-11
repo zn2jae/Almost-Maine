@@ -95,7 +95,7 @@ if st.session_state.selected_mission is not None:
             else:
                 st.error("오답입니다. 다시 시도하거나 배우에게 힌트를 얻으세요!")
 
-    # 미션 2: 랜덤 온라인 퀴즈 (자유 답변 포함)
+   # 미션 2: 랜덤 온라인 퀴즈 (자유 답변 포함 및 시트2 업데이트)
     elif m_idx == 1:
         st.markdown("### 🎫 미션 2: 공연 관련 퀴즈")
         current_q = st.session_state.m2_question
@@ -103,18 +103,27 @@ if st.session_state.selected_mission is not None:
         ans2 = st.text_input("답변 입력", key="input_q2").strip()
         
         if st.button("제출하기", key="sub2"):
-            # 자유 답변 문제(FREE_PASS)인 경우
+            # 1. 자유 답변 문제(FREE_PASS)인 경우
             if "FREE_PASS" in current_q['a']:
                 if not ans2:
                     st.warning("의견을 한 글자라도 적어주세요!")
                 else:
                     try:
-                        # 시트2에 저장할 데이터 구성
                         from datetime import datetime
-                        opinion_data = pd.DataFrame([{"시간": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "의견": ans2}])
+                        # 시트2의 기존 데이터를 읽어옵니다 (캐시 없이 실시간)
+                        existing_opinions = conn.read(worksheet="시트2", ttl=0)
                         
-                        # 시트2(Sheet2)로 전송
-                        conn.create(data=opinion_data, worksheet="시트2")
+                        # 새 의견 데이터 생성
+                        new_opinion = pd.DataFrame([{
+                            "시간": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 
+                            "의견": ans2
+                        }])
+                        
+                        # 기존 데이터 아래에 새 의견 추가
+                        updated_opinions = pd.concat([existing_opinions, new_opinion], ignore_index=True)
+                        
+                        # 시트2 전체를 업데이트 (에러 방지)
+                        conn.update(worksheet="시트2", data=updated_opinions)
                         
                         st.session_state.stamps[1] = True
                         st.session_state.selected_mission = None
@@ -123,7 +132,7 @@ if st.session_state.selected_mission is not None:
                     except Exception as e:
                         st.error(f"의견 저장 중 오류가 발생했습니다: {e}")
             
-            # 일반 퀴즈 문제인 경우
+            # 2. 일반 퀴즈 문제인 경우
             elif any(correct_ans in ans2.lower() for correct_ans in [a.lower() for a in current_q['a']]):
                 st.session_state.stamps[1] = True
                 st.session_state.selected_mission = None
@@ -131,7 +140,6 @@ if st.session_state.selected_mission is not None:
                 st.rerun()
             else:
                 st.error("오답입니다. 다시 시도해 보세요!")
-
     # 미션 3: 배우 상호작용 (기존 유지)
     elif m_idx == 2:
         st.markdown("### 🎫 미션 3: 배우 상호작용 I")
