@@ -116,16 +116,19 @@ if all(st.session_state.stamps):
         
         # 여기서부터 들여쓰기가 매우 중요합니다!
         if submit_button:
-            if name and sid and phone:
-                try:
-                    # 새 데이터 행 만들기
-                    new_data = pd.DataFrame([{"이름": name, "학번": sid, "연락처": phone}])
-                    
-                    # 서비스 계정 인증을 통한 데이터 추가 (append)
-                    conn.create(data=new_data) 
-                    
-                    st.success(f"{name}님, 응모가 성공적으로 완료되었습니다!")
-                except Exception as e:
-                    st.error(f"오류가 발생했습니다: {e}")
-            else:
-                st.error("모든 정보를 입력해주세요.")
+    if name and sid and phone:
+        try:
+            # 새 데이터 행 만들기 (1행의 헤더와 순서/이름이 같아야 합니다)
+            new_data = pd.DataFrame([{"이름": name, "학번": sid, "연락처": phone}])
+            
+            # worksheet="시트1"로 명시하여 기존 탭에 데이터를 추가합니다.
+            # 만약 구글 시트 하단 탭이 'Sheet1'이라면 아래를 "Sheet1"로 수정하세요.
+            conn.create(data=new_data, worksheet="시트1") 
+            
+            st.success(f"{name}님, 응모가 성공적으로 완료되었습니다!")
+            st.balloons()
+        except Exception as e:
+            # 혹시라도 이름이 안 맞아서 에러가 날 경우를 대비한 메시지
+            st.error(f"오류가 발생했습니다: {e}")
+    else:
+        st.error("모든 정보를 입력해주세요.")
