@@ -99,7 +99,7 @@ if st.session_state.selected_mission is not None:
                 st.error("최종 암호가 틀렸습니다.")
 
 # ... (하단 응모 섹션 코드는 그대로 유지) ...
-# 6. 최종 응모 섹션 (Google Sheets 실시간 저장)
+# --- 6. 최종 응모 섹션 (Google Sheets 실시간 저장) ---
 if all(st.session_state.stamps):
     st.divider()
     st.balloons()
@@ -110,20 +110,22 @@ if all(st.session_state.stamps):
         name = st.text_input("이름")
         sid = st.text_input("학번")
         phone = st.text_input("연락처")
+        
+        # '응모하기' 버튼
         submit_button = st.form_submit_button("응모하기")
         
-       if submit_button:
-    if name and sid and phone:
-        try:
-            # 새 데이터 행 만들기
-            new_data = pd.DataFrame([{"이름": name, "학번": sid, "연락처": phone}])
-            
-            # 기존 시트의 아래에 데이터 추가 (append)
-            conn.create(data=new_data) 
-            
-            st.success(f"{name}님, 응모가 완료되었습니다!")
-            st.balloons()
-        except Exception as e:
-            st.error(f"오류가 발생했습니다: {e}")
+        # 여기서부터 들여쓰기가 매우 중요합니다!
+        if submit_button:
+            if name and sid and phone:
+                try:
+                    # 새 데이터 행 만들기
+                    new_data = pd.DataFrame([{"이름": name, "학번": sid, "연락처": phone}])
+                    
+                    # 서비스 계정 인증을 통한 데이터 추가 (append)
+                    conn.create(data=new_data) 
+                    
+                    st.success(f"{name}님, 응모가 성공적으로 완료되었습니다!")
+                except Exception as e:
+                    st.error(f"오류가 발생했습니다: {e}")
             else:
                 st.error("모든 정보를 입력해주세요.")
