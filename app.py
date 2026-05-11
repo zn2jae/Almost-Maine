@@ -35,6 +35,8 @@ for i in range(4):
 
 st.divider()
 
+# ... (상단 설정 및 도장 현황판 코드는 그대로 유지) ...
+
 # 5. 선택된 미션 인터랙션 영역
 if st.session_state.selected_mission is not None:
     m_idx = st.session_state.selected_mission
@@ -43,24 +45,60 @@ if st.session_state.selected_mission is not None:
         st.session_state.selected_mission = None
         st.rerun()
 
+    # 미션 1 (기존 유지)
     if m_idx == 0:
         st.markdown("### 🎫 미션 1: 온라인 퀴즈")
-        ans1 = st.text_input("공연의 주인공 이름은?")
+        ans1 = st.text_input("공연의 주인공 이름은?", key="input_q1")
         if st.button("제출하기", key="sub1"):
             if ans1 == "정답1": # 실제 정답으로 수정
                 st.session_state.stamps[0] = True
                 st.session_state.selected_mission = None
                 st.rerun()
-    # ... (미션 2, 3도 동일하게 구성) ...
+            else:
+                st.error("틀렸습니다! 다시 입력해주세요.")
+
+    # 미션 2 (보완됨)
+    elif m_idx == 1:
+        st.markdown("### 🎫 미션 2: 온라인 퀴즈")
+        st.write("공연 포스터나 공지사항을 잘 확인해보세요!")
+        ans2 = st.text_input("공연이 열리는 요일은 언제인가요?", key="input_q2")
+        if st.button("제출하기", key="sub2"):
+            if ans2 == "목요일": # 실제 정답으로 수정
+                st.session_state.stamps[1] = True
+                st.session_state.selected_mission = None
+                st.success("두 번째 도장 획득!")
+                st.rerun()
+            else:
+                st.error("오답입니다. 포스터를 다시 확인해볼까요?")
+
+    # 미션 3 (보완됨)
+    elif m_idx == 2:
+        st.markdown("### 🎫 미션 3: 배우 상호작용")
+        st.write("교내에서 '배우' 명찰을 단 사람을 찾아 첫 번째 시크릿 코드를 물어보세요!")
+        code1 = st.text_input("첫 번째 시크릿 코드 입력", type="password", key="input_c1")
+        if st.button("확인", key="sub3"):
+            if code1 == "acting123": # 배우가 알려줄 암호로 수정
+                st.session_state.stamps[2] = True
+                st.session_state.selected_mission = None
+                st.success("세 번째 도장 획득!")
+                st.rerun()
+            else:
+                st.error("코드가 일치하지 않습니다.")
+
+    # 미션 4 (기존 유지)
     elif m_idx == 3:
         st.markdown("### 🎫 미션 4: 배우 상호작용")
-        code2 = st.text_input("최종 암호 입력", type="password")
+        st.write("마지막 배우를 찾아 최종 암호를 입력하세요!")
+        code2 = st.text_input("최종 암호 입력", type="password", key="input_c2")
         if st.button("확인", key="sub4"):
-            if code2 == "암호2": # 실제 암호로 수정
+            if code2 == "finalshow": # 실제 암호로 수정
                 st.session_state.stamps[3] = True
                 st.session_state.selected_mission = None
                 st.rerun()
+            else:
+                st.error("최종 암호가 틀렸습니다.")
 
+# ... (하단 응모 섹션 코드는 그대로 유지) ...
 # 6. 최종 응모 섹션 (Google Sheets 실시간 저장)
 if all(st.session_state.stamps):
     st.divider()
