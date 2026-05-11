@@ -3,7 +3,7 @@ from streamlit_gsheets import GSheetsConnection
 import pandas as pd
 
 # 1. 페이지 설정
-st.set_page_config(page_title="공연 홍보 도장판", layout="centered")
+st.set_page_config(page_title="Almost, Maine 도장판", layout="centered")
 
 # 2. 구글 시트 연결 초기화
 conn = st.connection("gsheets", type=GSheetsConnection)
@@ -16,11 +16,11 @@ if 'selected_mission' not in st.session_state:
     st.session_state.selected_mission = None
 
 # --- 앱 UI ---
-st.title("🎭 공연 홍보 디지털 도장판")
-st.info("4개의 도장을 모두 모으면 추첨 응모가 가능합니다!")
+st.title("🎭 Almost, Maine 도장판")
+st.info("4개의 도장을 모두 모으고 추첨 응모를 해보세요!")
 
 # 4. 도장 현황판 (미션 선택)
-st.subheader("📍 미션을 선택하세요")
+st.subheader("📍 진행하고 싶은 미션을 선택하세요")
 cols = st.columns(4)
 
 for i in range(4):
@@ -53,6 +53,7 @@ if st.session_state.selected_mission is not None:
             if ans1 == "정답1": # 실제 정답으로 수정
                 st.session_state.stamps[0] = True
                 st.session_state.selected_mission = None
+                st.success("첫 번째 도장 획득!")
                 st.rerun()
             else:
                 st.error("틀렸습니다! 다시 입력해주세요.")
@@ -73,7 +74,7 @@ if st.session_state.selected_mission is not None:
 
     # 미션 3 (보완됨)
     elif m_idx == 2:
-        st.markdown("### 🎫 미션 3: 배우 상호작용")
+        st.markdown("### 🎫 미션 3: 배우를 찾아라!")
         st.write("교내에서 '배우' 명찰을 단 사람을 찾아 첫 번째 시크릿 코드를 물어보세요!")
         code1 = st.text_input("첫 번째 시크릿 코드 입력", type="password", key="input_c1")
         if st.button("확인", key="sub3"):
@@ -87,13 +88,14 @@ if st.session_state.selected_mission is not None:
 
     # 미션 4 (기존 유지)
     elif m_idx == 3:
-        st.markdown("### 🎫 미션 4: 배우 상호작용")
+        st.markdown("### 🎫 미션 4: 배우를 찾아라!!")
         st.write("마지막 배우를 찾아 최종 암호를 입력하세요!")
         code2 = st.text_input("최종 암호 입력", type="password", key="input_c2")
         if st.button("확인", key="sub4"):
             if code2 == "finalshow": # 실제 암호로 수정
                 st.session_state.stamps[3] = True
                 st.session_state.selected_mission = None
+                st.success("네 번째 도장 획득!")
                 st.rerun()
             else:
                 st.error("최종 암호가 틀렸습니다.")
