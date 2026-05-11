@@ -103,15 +103,32 @@ if st.session_state.selected_mission is not None:
         ans2 = st.text_input("답변 입력", key="input_q2").strip()
         
         if st.button("제출하기", key="sub2"):
-            # 자유 답변 문제(FREE_PASS)이거나 정답이 포함된 경우
-            if "FREE_PASS" in current_q['a'] or any(correct_ans in ans2.lower() for correct_ans in [a.lower() for a in current_q['a']]):
-                if "FREE_PASS" in current_q['a'] and not ans2:
+            # 자유 답변 문제(FREE_PASS)인 경우
+            if "FREE_PASS" in current_q['a']:
+                if not ans2:
                     st.warning("의견을 한 글자라도 적어주세요!")
                 else:
-                    st.session_state.stamps[1] = True
-                    st.session_state.selected_mission = None
-                    st.success("두 번째 도장 획득!")
-                    st.rerun()
+                    try:
+                        # 시트2에 저장할 데이터 구성
+                        from datetime import datetime
+                        opinion_data = pd.DataFrame([{"시간": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "의견": ans2}])
+                        
+                        # 시트2(Sheet2)로 전송
+                        conn.create(data=opinion_data, worksheet="시트2")
+                        
+                        st.session_state.stamps[1] = True
+                        st.session_state.selected_mission = None
+                        st.success("소중한 의견 감사합니다! 두 번째 도장 획득!")
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"의견 저장 중 오류가 발생했습니다: {e}")
+            
+            # 일반 퀴즈 문제인 경우
+            elif any(correct_ans in ans2.lower() for correct_ans in [a.lower() for a in current_q['a']]):
+                st.session_state.stamps[1] = True
+                st.session_state.selected_mission = None
+                st.success("정답입니다! 두 번째 도장 획득!")
+                st.rerun()
             else:
                 st.error("오답입니다. 다시 시도해 보세요!")
 
