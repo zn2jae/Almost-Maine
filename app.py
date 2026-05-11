@@ -105,30 +105,30 @@ if all(st.session_state.stamps):
     st.balloons()
     st.success("🎉 모든 도장을 모으셨습니다! 아래 양식을 작성하여 응모하세요.")
     
+    # st.form 내부의 모든 요소는 반드시 같은 수준으로 들여쓰기 되어야 합니다.
     with st.form("entry_form"):
         st.subheader("🎟️ 추첨 응모함")
         name = st.text_input("이름")
         sid = st.text_input("학번")
         phone = st.text_input("연락처")
         
-        # '응모하기' 버튼
+        # 폼 제출 버튼
         submit_button = st.form_submit_button("응모하기")
         
-        # 여기서부터 들여쓰기가 매우 중요합니다!
+        # 버튼이 눌렸을 때의 로직 (버튼과 들여쓰기 수준이 같아야 함)
         if submit_button:
-    if name and sid and phone:
-        try:
-            # 새 데이터 행 만들기 (1행의 헤더와 순서/이름이 같아야 합니다)
-            new_data = pd.DataFrame([{"이름": name, "학번": sid, "연락처": phone}])
-            
-            # worksheet="시트1"로 명시하여 기존 탭에 데이터를 추가합니다.
-            # 만약 구글 시트 하단 탭이 'Sheet1'이라면 아래를 "Sheet1"로 수정하세요.
-            conn.create(data=new_data, worksheet="시트1") 
-            
-            st.success(f"{name}님, 응모가 성공적으로 완료되었습니다!")
-            st.balloons()
-        except Exception as e:
-            # 혹시라도 이름이 안 맞아서 에러가 날 경우를 대비한 메시지
-            st.error(f"오류가 발생했습니다: {e}")
-    else:
-        st.error("모든 정보를 입력해주세요.")
+            if name and sid and phone:
+                try:
+                    # 새 데이터 행 만들기
+                    new_data = pd.DataFrame([{"이름": name, "학번": sid, "연락처": phone}])
+                    
+                    # '시트1' 워크시트에 데이터 추가
+                    # 인증 에러 방지를 위해 worksheet 이름을 명시했습니다.
+                    conn.create(data=new_data, worksheet="시트1") 
+                    
+                    st.success(f"{name}님, 응모가 성공적으로 완료되었습니다!")
+                except Exception as e:
+                    # 상세 에러 메시지 출력으로 문제 파악 용이하게 설정
+                    st.error(f"데이터 전송 중 오류가 발생했습니다: {e}")
+            else:
+                st.error("모든 정보를 입력해주세요.")
