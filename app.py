@@ -38,6 +38,36 @@ st.divider()
 # ... (상단 설정 및 도장 현황판 코드는 그대로 유지) ...
 
 # 5. 선택된 미션 인터랙션 영역
+import random
+
+# --- [추가] 퀴즈 데이터 정의 ---
+# 미션 1 문제 리스트
+if 'q1_pool' not in st.session_state:
+    st.session_state.q1_pool = [
+        {"q": "배우가 무대 위에서 각본(희곡)에 따라 인물이나 사건을 말과 동작으로 연기하여 관객에게 직접 보여주는 무대 예술을 무엇이라 할까요?", "a": ["연극"]},
+        {"q": "오늘날 타인에게 비치는 외적인격이나 사회적 가면을 뜻하는 말로, 고대 그리스 연극에서 배우가 쓰던 가면에서 유래된 말은?", "a": ["페르소나"]},
+        {"q": "연극의 3요소는 무엇일까요?\n(힌트: 연기하는 OO, 그것을 보는 OO, 배우가 보는 OO)", "a": ["배우, 관객, 희곡", "배우, 관객, 대본"]},
+        {"q": "경상국립대학교 공연분과 연극 동아리의 이름은?", "a": ["경상극예술연구회", "경상극회"]},
+        {"q": "이번 5월, 저희 동아리에서 올리는 공연의 이름은?", "a": ["올모스트 메인", "almost maine", "올모스트, 메인"]}
+    ]
+
+# 미션 2 문제 리스트
+if 'q2_pool' not in st.session_state:
+    st.session_state.q2_pool = [
+        {"q": "다른 사람을 진심으로 애틋하게 그리워하고 열렬히 좋아하며 온 마음과 정성을 다해 자신의 모든 걸 내어 줄 수 있는 감정을 무엇이라 하나요?", "a": ["사랑"]},
+        {"q": "우리말로 '거의'라는 뜻을 가진 영어 단어는?", "a": ["올모스트", "almost"]},
+        {"q": "보통 추운 지역에서 발견되는 천문학적 기상현상을 무엇이라 하나요?", "a": ["오로라"]},
+        {"q": "프로포즈를 위해 상대에게 건네는 '이것'은 무엇일까요?\n(힌트: 악세서리)", "a": ["반지"]},
+        {"q": "친구 사이, 우리는 연인이 될 수 있다?\n(힌트: 자유로운 의견을 적어주세요 ^^)", "a": ["FREE_PASS"]} # 자유 답변용 키워드
+    ]
+
+# 각 미션별 랜덤 문제 선택 상태 관리
+if 'm1_question' not in st.session_state:
+    st.session_state.m1_question = random.choice(st.session_state.q1_pool)
+if 'm2_question' not in st.session_state:
+    st.session_state.m2_question = random.choice(st.session_state.q2_pool)
+
+# --- 미션 인터랙션 영역 ---
 if st.session_state.selected_mission is not None:
     m_idx = st.session_state.selected_mission
     
@@ -45,62 +75,67 @@ if st.session_state.selected_mission is not None:
         st.session_state.selected_mission = None
         st.rerun()
 
-    # 미션 1 (기존 유지)
+    # 상시 표시 힌트 문구
+    if m_idx in [0, 1]:
+        st.caption("💡 퀴즈의 답을 모르겠다면? 주변의 배우들을 찾아 힌트를 얻어보세요!")
+
+    # 미션 1: 랜덤 온라인 퀴즈
     if m_idx == 0:
-        st.markdown("### 🎫 미션 1: 온라인 퀴즈")
-        ans1 = st.text_input("공연의 주인공 이름은?", key="input_q1")
+        st.markdown("### 🎫 미션 1: 연극 상식 퀴즈")
+        current_q = st.session_state.m1_question
+        st.write(f"**Q. {current_q['q']}**")
+        ans1 = st.text_input("답변 입력", key="input_q1").strip()
+        
         if st.button("제출하기", key="sub1"):
-            if ans1 == "정답1": # 실제 정답으로 수정
+            if any(correct_ans in ans1.lower() for correct_ans in [a.lower() for a in current_q['a']]):
                 st.session_state.stamps[0] = True
                 st.session_state.selected_mission = None
                 st.success("첫 번째 도장 획득!")
                 st.rerun()
             else:
-                st.error("틀렸습니다! 다시 입력해주세요.")
+                st.error("오답입니다. 다시 시도하거나 배우에게 힌트를 얻으세요!")
 
-    # 미션 2 (보완됨)
+    # 미션 2: 랜덤 온라인 퀴즈 (자유 답변 포함)
     elif m_idx == 1:
-        st.markdown("### 🎫 미션 2: 온라인 퀴즈")
-        st.write("공연 포스터나 공지사항을 잘 확인해보세요!")
-        ans2 = st.text_input("공연이 열리는 요일은 언제인가요?", key="input_q2")
+        st.markdown("### 🎫 미션 2: 공연 관련 퀴즈")
+        current_q = st.session_state.m2_question
+        st.write(f"**Q. {current_q['q']}**")
+        ans2 = st.text_input("답변 입력", key="input_q2").strip()
+        
         if st.button("제출하기", key="sub2"):
-            if ans2 == "목요일": # 실제 정답으로 수정
-                st.session_state.stamps[1] = True
-                st.session_state.selected_mission = None
-                st.success("두 번째 도장 획득!")
-                st.rerun()
+            # 자유 답변 문제(FREE_PASS)이거나 정답이 포함된 경우
+            if "FREE_PASS" in current_q['a'] or any(correct_ans in ans2.lower() for correct_ans in [a.lower() for a in current_q['a']]):
+                if "FREE_PASS" in current_q['a'] and not ans2:
+                    st.warning("의견을 한 글자라도 적어주세요!")
+                else:
+                    st.session_state.stamps[1] = True
+                    st.session_state.selected_mission = None
+                    st.success("두 번째 도장 획득!")
+                    st.rerun()
             else:
-                st.error("오답입니다. 포스터를 다시 확인해볼까요?")
+                st.error("오답입니다. 다시 시도해 보세요!")
 
-    # 미션 3 (보완됨)
+    # 미션 3: 배우 상호작용 (기존 유지)
     elif m_idx == 2:
-        st.markdown("### 🎫 미션 3: 배우를 찾아라!")
-        st.write("교내에서 '배우' 명찰을 단 사람을 찾아 첫 번째 시크릿 코드를 물어보세요!")
-        code1 = st.text_input("첫 번째 시크릿 코드 입력", type="password", key="input_c1")
+        st.markdown("### 🎫 미션 3: 배우 상호작용 I")
+        st.write("배우를 찾아 '첫 번째 암호'를 물어보세요!")
+        code1 = st.text_input("시크릿 코드 입력", type="password", key="input_c1")
         if st.button("확인", key="sub3"):
-            if code1 == "acting123": # 배우가 알려줄 암호로 수정
+            if code1 == "1234": # 실제 암호로 수정
                 st.session_state.stamps[2] = True
                 st.session_state.selected_mission = None
-                st.success("세 번째 도장 획득!")
                 st.rerun()
-            else:
-                st.error("코드가 일치하지 않습니다.")
 
-    # 미션 4 (기존 유지)
+    # 미션 4: 배우 상호작용 (기존 유지)
     elif m_idx == 3:
-        st.markdown("### 🎫 미션 4: 배우를 찾아라!!")
-        st.write("마지막 배우를 찾아 최종 암호를 입력하세요!")
+        st.markdown("### 🎫 미션 4: 배우 상호작용 II")
+        st.write("다른 배우를 찾아 '최종 암호'를 입력하세요!")
         code2 = st.text_input("최종 암호 입력", type="password", key="input_c2")
         if st.button("확인", key="sub4"):
-            if code2 == "finalshow": # 실제 암호로 수정
+            if code2 == "5678": # 실제 암호로 수정
                 st.session_state.stamps[3] = True
                 st.session_state.selected_mission = None
-                st.success("네 번째 도장 획득!")
                 st.rerun()
-            else:
-                st.error("최종 암호가 틀렸습니다.")
-
-# ... (하단 응모 섹션 코드는 그대로 유지) ...
 # --- 6. 최종 응모 섹션 (안전한 데이터 업데이트 방식) ---
 if all(st.session_state.stamps):
     st.divider()
