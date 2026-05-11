@@ -57,5 +57,3 @@ if all(st.session_state.stamps):
                 st.success(f"{name}님, 실시간 응모가 완료되었습니다! 시트에서 확인 가능합니다.")
             else:
                 st.error("모든 정보를 입력해주세요.")
-
-이제 이 코드를 `app.py`에 덮어쓰고 GitHub에 푸시하면 끝입니다! 성공적인 공연 홍보가 되길 진심으로 응원합니다. 추가로 궁금한 점이 생기면 언제든 물어봐 주세요!
