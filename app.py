@@ -140,27 +140,44 @@ if st.session_state.selected_mission is not None:
                 st.rerun()
             else:
                 st.error("오답입니다. 다시 시도해 보세요!")
-    # 미션 3: 배우 상호작용 (기존 유지)
+    
+    # 미션 3: 배우 상호작용 I (8명의 대사 중 하나 입력)
     elif m_idx == 2:
         st.markdown("### 🎫 미션 3: 배우 상호작용 I")
-        st.write("배우를 찾아 '첫 번째 암호'를 물어보세요!")
-        code1 = st.text_input("시크릿 코드 입력", type="password", key="input_c1")
+        st.write("배우를 찾아 그들의 '대표 대사'를 물어보세요!")
+        
+        # 인정할 대사 리스트 (실제 대사들로 수정하세요)
+        mission3_answers = ["대사1", "대사2", "대사3", "대사4", "대사5", "대사6", "대사7", "대사8"]
+        
+        code1 = st.text_input("첫 번째 시크릿 코드 입력", type="password", key="input_c1").strip()
         if st.button("확인", key="sub3"):
-            if code1 == "1234": # 실제 암호로 수정
+            # 입력값이 리스트 안에 있는지 확인 (대소문자 구분 없애려면 .lower() 활용)
+            if code1 in mission3_answers:
                 st.session_state.stamps[2] = True
                 st.session_state.selected_mission = None
+                st.success("세 번째 도장 획득!")
                 st.rerun()
+            else:
+                st.error("코드가 일치하지 않습니다. 배우에게 다시 물어보세요!")
 
-    # 미션 4: 배우 상호작용 (기존 유지)
+    # 미션 4: 배우 상호작용 II (다른 복수 답안 설정 가능)
     elif m_idx == 3:
         st.markdown("### 🎫 미션 4: 배우 상호작용 II")
-        st.write("다른 배우를 찾아 '최종 암호'를 입력하세요!")
-        code2 = st.text_input("최종 암호 입력", type="password", key="input_c2")
+        st.write("다른 배우를 찾아 그들의 '대표 대사'를 입력하세요!")
+        
+        # 미션 3과 다른 대사 리스트를 쓰거나 동일하게 사용 가능
+        mission4_answers = ["정답1", "정답2", "정답3", "정답4", "정답5", "정답6", "정답7", "정답8"]
+        
+        code2 = st.text_input("최종 암호 입력", type="password", key="input_c2").strip()
         if st.button("확인", key="sub4"):
-            if code2 == "5678": # 실제 암호로 수정
+            if code2 in mission4_answers:
                 st.session_state.stamps[3] = True
                 st.session_state.selected_mission = None
+                st.success("모든 도장 완료! 이제 응모가 가능합니다.")
                 st.rerun()
+            else:
+                st.error("최종 암호가 틀렸습니다.")
+
 # --- 6. 최종 응모 섹션 (안전한 데이터 업데이트 방식) ---
 if all(st.session_state.stamps):
     st.divider()
