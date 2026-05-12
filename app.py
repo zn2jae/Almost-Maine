@@ -147,7 +147,7 @@ if st.session_state.selected_mission is not None:
         st.write("배우를 찾아 활동을 하고, 비밀 암호를 물어보세요!")
         
         # 인정할 대사 리스트 (실제 대사들로 수정하세요)
-        mission3_answers = ["대사1", "대사2", "대사3", "대사4", "대사5", "대사6", "대사7", "대사8"]
+        mission3_answers = ["사랑합니다", "넌 날 사랑하지 않아", "너를 사랑한다고", "사랑해요, 사랑했어요"]
         
         code1 = st.text_input("첫 번째 시크릿 코드 입력", type="password", key="input_c1").strip()
         if st.button("확인", key="sub3"):
@@ -166,7 +166,7 @@ if st.session_state.selected_mission is not None:
         st.write("다른 배우들을 찾아 최종 코드를 입력하세요!")
         
         # 미션 3과 다른 대사 리스트를 쓰거나 동일하게 사용 가능
-        mission4_answers = ["정답1", "정답2", "정답3", "정답4", "정답5", "정답6", "정답7", "정답8"]
+        mission4_answers = ["사랑합니다", "넌 날 사랑하지 않아", "너를 사랑한다고", "사랑해요, 사랑했어요"]
         
         code2 = st.text_input("최종 암호 입력", type="password", key="input_c2").strip()
         if st.button("확인", key="sub4"):
