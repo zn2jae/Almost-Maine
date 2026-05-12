@@ -144,7 +144,7 @@ if st.session_state.selected_mission is not None:
     # 미션 3: 배우 상호작용 I (8명의 대사 중 하나 입력)
     elif m_idx == 2:
         st.markdown("### 🎫 미션 3: 배우 상호작용 I")
-        st.write("배우를 찾아 그들의 '대표 대사'를 물어보세요!")
+        st.write("배우를 찾아 활동을 하고, 비밀 암호를 물어보세요!")
         
         # 인정할 대사 리스트 (실제 대사들로 수정하세요)
         mission3_answers = ["대사1", "대사2", "대사3", "대사4", "대사5", "대사6", "대사7", "대사8"]
@@ -163,7 +163,7 @@ if st.session_state.selected_mission is not None:
     # 미션 4: 배우 상호작용 II (다른 복수 답안 설정 가능)
     elif m_idx == 3:
         st.markdown("### 🎫 미션 4: 배우 상호작용 II")
-        st.write("다른 배우를 찾아 그들의 '대표 대사'를 입력하세요!")
+        st.write("다른 배우들을 찾아 최종 코드를 입력하세요!")
         
         # 미션 3과 다른 대사 리스트를 쓰거나 동일하게 사용 가능
         mission4_answers = ["정답1", "정답2", "정답3", "정답4", "정답5", "정답6", "정답7", "정답8"]
