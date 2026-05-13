@@ -10,20 +10,20 @@ conn = st.connection("gsheets", type=GSheetsConnection)
 
 # 3. 세션 상태 초기화
 if 'stamps' not in st.session_state:
-    st.session_state.stamps = [False, False, False, False]
+    st.session_state.stamps = [False, False]
 
 if 'selected_mission' not in st.session_state:
     st.session_state.selected_mission = None
 
 # --- 앱 UI ---
 st.title("🎭 Almost, Maine 도장판")
-st.info("4개의 도장을 모두 모으고 추첨 응모를 해보세요!")
+st.info("도장을 모두 모으고 추첨 응모를 해보세요!")
 
 # 4. 도장 현황판 (미션 선택)
 st.subheader("📍 진행하고 싶은 미션을 선택하세요")
-cols = st.columns(4)
+cols = st.columns(2)
 
-for i in range(4):
+for i in range(2):
     with cols[i]:
         img_path = "images/stamp_filled.png" if st.session_state.stamps[i] else "images/stamp_empty.png"
         st.image(img_path, use_container_width=True)
@@ -141,70 +141,6 @@ if st.session_state.selected_mission is not None:
             else:
                 st.error("오답입니다. 다시 시도해 보세요!")
     
-    # 미션 3: 배우 상호작용 I (복수 답안 & 전처리 로직)
-    elif m_idx == 2:
-        st.markdown("### 🎫 미션 3: 배우 상호작용 I")
-        st.write("배우를 찾아 활동하고 비밀 암호를 물어보세요!")
-        
-        # 인정할 대사 리스트 (쉼표, 띄어쓰기 그대로 적으셔도 됩니다)
-        mission3_answers = ["사랑합니다", "넌 날 사랑하지 않아", "너를 사랑한다고", "사랑해요, 사랑했어요"]
-        
-        code1 = st.text_input("첫 번째 시크릿 코드 입력", type="password", key="input_c1")
-        
-        if st.button("확인", key="sub3"):
-            # 전처리 함수: 공백과 문장부호를 제거하고 소문자로 통일
-            def clean_text(text):
-                punctuations = " ,.?!'\"" 
-                for p in punctuations:
-                    text = text.replace(p, "")
-                return text.lower()
-
-            cleaned_input = clean_text(code1)
-            # 입력값이 비어있지 않은지 먼저 확인
-            if not cleaned_input:
-                st.warning("암호를 입력해주세요!")
-            else:
-                # 정답 리스트 내의 대사들도 전처리하여 비교
-                is_correct = any(cleaned_input == clean_text(ans) for ans in mission3_answers)
-
-                if is_correct:
-                    st.session_state.stamps[2] = True
-                    st.session_state.selected_mission = None
-                    st.success("세 번째 도장 획득! 대사가 아주 멋지네요.")
-                    st.rerun()
-                else:
-                    st.error("코드가 일치하지 않습니다. 배우에게 다시 물어보세요!")
-
-    # 미션 4: 배우 상호작용 II (미션 3와 동일한 로직 적용)
-    elif m_idx == 3:
-        st.markdown("### 🎫 미션 4: 배우 상호작용 II")
-        st.write("다른 배우를 찾아 그들의 최종 암호를 입력하세요!")
-        
-        # 미션 4 전용 대사 리스트 (필요시 수정)
-        mission4_answers = ["사랑합니다", "넌 날 사랑하지 않아", "너를 사랑한다고", "사랑해요, 사랑했어요"]
-        
-        code2 = st.text_input("최종 암호 입력", type="password", key="input_c2")
-        
-        if st.button("확인", key="sub4"):
-            def clean_text(text):
-                punctuations = " ,.?!'\"" 
-                for p in punctuations:
-                    text = text.replace(p, "")
-                return text.lower()
-
-            cleaned_input = clean_text(code2)
-            if not cleaned_input:
-                st.warning("암호를 입력해주세요!")
-            else:
-                is_correct = any(cleaned_input == clean_text(ans) for ans in mission4_answers)
-
-                if is_correct:
-                    st.session_state.stamps[3] = True
-                    st.session_state.selected_mission = None
-                    st.success("모든 도장을 완료했습니다! 이제 하단에서 응모를 진행하세요.")
-                    st.rerun()
-                else:
-                    st.error("최종 암호가 틀렸습니다. 다시 한번 확인해보세요!")
 
 # --- 6. 최종 응모 섹션 (안전한 데이터 업데이트 방식) ---
 if all(st.session_state.stamps):
